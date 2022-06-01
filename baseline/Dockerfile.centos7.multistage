@@ -1,0 +1,75 @@
+# syntax=docker/dockerfile:1
+FROM centos:centos7 AS marte2_base
+
+# Cache control use this with docker build --build-arg CACHE_DATE="$(date)" to force refresh.
+ARG CACHE_DATE=1999-01-04
+
+# Create a harmless exception for the set -u guards in the env scripts
+ENV LD_LIBRARY_PATH=/root
+
+# Allow introspection in the image 
+ENV DOCKERHUB_IMAGE_NAME=MARTe2-baseline-centos7
+
+# Minimal requirements for any usable image
+RUN yum -y install tmux vim
+
+# Using wget to retrieve install scripts.
+RUN yum -y install wget
+
+# To clone from some repos recursively requires git > 1.8.x (default centos) so jump through hoops
+RUN yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+
+RUN yum -y install git
+
+# Scripts should work robustly from any reasonable directory.
+ENV INSTALLATION_DIR=/opt/MARTe2/Projects
+
+WORKDIR "$INSTALLATION_DIR"
+
+#RUN git clone https://github.com/AdamVStephen/my-dockers
+
+RUN wget https://raw.githubusercontent.com/AdamVStephen/my-dockers/main/MARTe2/builder.sh
+
+RUN wget https://raw.githubusercontent.com/AdamVStephen/my-dockers/main/MARTe2/utils.sh
+
+RUN wget https://raw.githubusercontent.com/AdamVStephen/my-dockers/main/MARTe2/install-packages.sh
+
+RUN wget https://raw.githubusercontent.com/AdamVStephen/my-dockers/main/MARTe2/install-source-dependencies.sh
+
+RUN wget https://raw.githubusercontent.com/AdamVStephen/my-dockers/main/MARTe2/build-sources.sh
+
+RUN chmod a+x *.sh
+
+RUN wget https://raw.githubusercontent.com/AdamVStephen/my-dockers/main/MARTe2/Dockerfile.centos7.multistage
+
+FROM marte2_base AS marte2_packages
+
+RUN ./install-packages.sh
+
+FROM marte2_packages AS marte2_source
+
+RUN ./install-source-dependencies.sh "${INSTALLATION_DIR}"
+
+FROM marte2_source AS marte2_built
+
+ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
+ENV MARTe2_Components_DIR=${INSTALLATION_DIR}/MARTe2-components
+
+ENV EPICS_BASE=${INSTALLATION_DIR}/epics-base-7.0.2
+#ENV EPICS_BASE=${INSTALLATION_DIR}/epics-base-7.0.6
+ENV EPICSPVA=${INSTALLATION_DIR}/epics-base-7.0.2
+#ENV EPICSPVA=${INSTALLATION_DIR}/epics-base-7.0.6
+ENV EPICS_HOST_ARCH=linux-x86_64
+ENV SDN_CORE_INCLUDE_DIR=${INSTALLATION_DIR}/SDN_1.0.12_nonCCS/src/main/c++/include/
+ENV SDN_CORE_LIBRARY_DIR=${INSTALLATION_DIR}/SDN_1.0.12_nonCCS/target/lib/
+
+ENV PATH=$PATH:${INSTALLATION_DIR}/epics-base-7.0.2/bin/linux-x86_64
+#ENV PATH=$PATH:${INSTALLATION_DIR}/epics-base-7.0.6/bin/linux-x86_64
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_DIR/Build/x86-linux/Core/:$EPICS_BASE/lib/$EPICS_HOST_ARCH:$SDN_CORE_LIBRARY_DIR
+#ENV EPICS_CA_ADDR_LIST=10.208.19.255
+ENV EPICS_CA_AUTO_ADDR_LIST=NO
+
+RUN ./build-sources.sh "${INSTALLATION_DIR}"
+
+CMD /bin/bash
+

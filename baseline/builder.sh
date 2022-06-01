@@ -25,7 +25,9 @@ usage() {
 
 export CODENAME=v0.1.0
 export DOCKERFILE_CENTOS7=Dockerfile.centos7.multistage
-export DOCKER_TAG_PREFIX=git.ccfe.ac.uk:4567/marte2/dockers/MARTe2-dockers/baseline-centos7
+
+# NB : No Capitals permitted in the docker name even if there are such in the repo name.
+export DOCKER_TAG_PREFIX=git.ccfe.ac.uk:4567/marte2/dockers/marte2-dockers/baseline-
 
 build_stage() {
 
@@ -41,7 +43,7 @@ build_stage() {
 		unset CACHE_OPT
 	fi
 
-	this_log="build.${TARGET_OS}.${TARGET_STAGE}.${CODENAME}.$(date +%s)"
+	this_log="build.${TARGET_OS}.${TARGET_STAGE}.${CODENAME}.$(date +%s).log"
 
 	# shellcheck disable=SC2086 # code is rrelevant because quotes areound CACHE_OPT would break
 	time docker build ${CACHE_OPT} \
