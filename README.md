@@ -7,8 +7,8 @@ that provide reference builds of MARTe2 and related open source projects.
 
 To use this repository to build local docker images, the intended workflow is :
 
-- cd <target>
-- ./builder.sh <os>
+- cd \<target\>
+- ./builder.sh \<os\>
 
 where each of the directories represents a target which is a combination of particular releases of the
 MARTe2 core and components repositories, possibly mixed with othe standard reference stacks (EPICS, MDSplus, ...).
