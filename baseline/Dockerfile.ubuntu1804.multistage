@@ -1,13 +1,18 @@
 # syntax=docker/dockerfile:1
-#FROM centos:centos7 AS marte2_base
-FROM ubuntu:18.04 AS marte2_base
-
-RUN apt update
-
 # REF https://bobcares.com/blog/debian_frontendnoninteractive-docker/
 # ENV debian_frontend would persist into the image, hence replace by ARG
 #ENV debian_frontend=noninteractive
 ARG DEBIAN_FRONTEND=noninteractive
+# In addition to placate tzdata
+ARG TZ="Europe/London"
+#FROM centos:centos7 AS marte2_base
+FROM ubuntu:18.04 AS marte2_base
+
+# Multistage : propagate ARGs
+ARG DEBIAN_FRONTEND
+ARG TZ
+
+RUN apt update
 
 # Cache control use this with docker build --build-arg CACHE_DATE="$(date)" to force refresh.
 ARG CACHE_DATE=1999-01-04
@@ -47,6 +52,10 @@ COPY utils.sh utils.sh
 #############################################################################################################
 FROM marte2_base AS marte2_packages
 
+# Multistage : propagate ARGs
+ARG DEBIAN_FRONTEND
+ARG TZ
+
 COPY install-packages.sh install-packages.sh
 
 RUN ./install-packages.sh
@@ -56,6 +65,10 @@ RUN ./install-packages.sh
 #############################################################################################################
 FROM marte2_packages AS marte2_source
 
+# Multistage : propagate ARGs
+ARG DEBIAN_FRONTEND
+ARG TZ
+
 COPY install-sources.sh install-sources.sh
 
 RUN ./install-sources.sh "${INSTALLATION_DIR}"
@@ -64,6 +77,10 @@ RUN ./install-sources.sh "${INSTALLATION_DIR}"
 # Compile EPICS support
 #############################################################################################################
 FROM marte2_source AS marte2_epics_built
+
+# Multistage : propagate ARGs
+ARG DEBIAN_FRONTEND
+ARG TZ
 
 ARG EPICS_VERSION=7.0.2
 
@@ -96,6 +113,10 @@ RUN ./build-epics.sh "${INSTALLATION_DIR}" "${EPICS_VERSION}"
 #############################################################################################################
 FROM marte2_epics_built AS marte2_core_built
 
+# Multistage : propagate ARGs
+ARG DEBIAN_FRONTEND
+ARG TZ
+
 ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
 
 COPY build-marte2.sh build-marte2.sh
@@ -109,12 +130,20 @@ RUN ./build-marte2.sh core "${INSTALLATION_DIR}" "${MARTe2_REF}"
 #############################################################################################################
 FROM marte2_core_built AS marte2_sdn_built
 
+# Multistage : propagate ARGs
+ARG DEBIAN_FRONTEND
+ARG TZ
+
 RUN ./build-marte2.sh sdn "${INSTALLATION_DIR}" 
 
 #############################################################################################################
 # Compile MARTe2-components
 #############################################################################################################
 FROM marte2_sdn_built AS marte2_built
+
+# Multistage : propagate ARGs
+ARG DEBIAN_FRONTEND
+ARG TZ
 
 ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
 
