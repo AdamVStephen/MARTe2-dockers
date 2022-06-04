@@ -6,9 +6,9 @@
 # TODO: test all combinations (cache/no-cache)
 # TODO: refactor to eliminate the duplication
 
-SUPPORTED_DISTROS="centos7 ubuntu1804 ubuntu2004 debian11"
+SUPPORTED_DISTROS="centos7 rockylinux ubuntu1804 ubuntu2004 debian11"
 
-RELEASED_TAGS="v0.1.0"
+RELEASED_TAGS="v1.6.0-v1.5.1"
 
 usage() {
 	echo "builder.sh distro [codename]"

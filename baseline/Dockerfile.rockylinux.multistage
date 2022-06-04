@@ -1,0 +1,112 @@
+# syntax=docker/dockerfile:1
+FROM rockylinux AS marte2_base
+
+# Cache control use this with docker build --build-arg CACHE_DATE="$(date)" to force refresh.
+ARG CACHE_DATE=1999-01-04
+
+# Create a harmless exception for the set -u guards in the env scripts
+ENV LD_LIBRARY_PATH=/root
+
+# Allow introspection in the image 
+ENV DOCKERHUB_IMAGE_NAME=MARTe2-baseline-centos7
+
+# Minimal requirements for any usable image
+RUN yum -y install tmux vim
+
+# Using wget to retrieve SDN Source code
+RUN yum -y install wget
+
+# To clone from some repos recursively requires git > 1.8.x (default centos) so jump through hoops
+RUN yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+
+RUN yum -y install git
+
+# Scripts should work robustly from any reasonable directory.
+ENV INSTALLATION_DIR=/opt/MARTe2/Projects
+
+WORKDIR "$INSTALLATION_DIR"
+
+COPY utils.sh utils.sh
+
+#############################################################################################################
+# Packaged dependencies
+#############################################################################################################
+FROM marte2_base AS marte2_packages
+
+COPY install-packages.sh install-packages.sh
+
+RUN ./install-packages.sh
+
+#############################################################################################################
+# Source code 
+#############################################################################################################
+FROM marte2_packages AS marte2_source
+
+COPY install-sources.sh install-sources.sh
+
+RUN ./install-sources.sh "${INSTALLATION_DIR}"
+
+#############################################################################################################
+# Compile EPICS support
+#############################################################################################################
+FROM marte2_source AS marte2_epics_built
+
+ARG EPICS_VERSION=7.0.2
+
+ENV EPICS_BASE=${INSTALLATION_DIR}/epics-base-${EPICS_VERSION}
+
+ENV EPICSPVA=${INSTALLATION_DIR}/epics-base-${EPICS_VERSION}
+
+ENV EPICS_HOST_ARCH=linux-x86_64
+
+ENV SDN_CORE_INCLUDE_DIR=${INSTALLATION_DIR}/SDN_1.0.12_nonCCS/src/main/c++/include/
+
+ENV SDN_CORE_LIBRARY_DIR=${INSTALLATION_DIR}/SDN_1.0.12_nonCCS/target/lib/
+
+ENV PATH=$PATH:${INSTALLATION_DIR}/epics-base-${EPICS_VERSION}/bin/linux-x86_64
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_DIR/Build/x86-linux/Core/:$EPICS_BASE/lib/$EPICS_HOST_ARCH:$SDN_CORE_LIBRARY_DIR
+
+ARG CA_ADDR_LIST=192.168.1.255
+
+ENV EPICS_CA_ADDR_LIST=${CA_ADDR_LIST}
+
+ENV EPICS_CA_AUTO_ADDR_LIST=NO
+
+COPY build-epics.sh build-epics.sh
+
+RUN ./build-epics.sh "${INSTALLATION_DIR}" "${EPICS_VERSION}"
+
+#############################################################################################################
+# Compile MARTe2
+#############################################################################################################
+FROM marte2_epics_built AS marte2_core_built
+
+ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
+
+COPY build-marte2.sh build-marte2.sh
+
+ARG MARTe2_REF=v1.6.0
+
+RUN ./build-marte2.sh core "${INSTALLATION_DIR}" "${MARTe2_REF}"
+
+#############################################################################################################
+# Compile SDN
+#############################################################################################################
+FROM marte2_core_built AS marte2_sdn_built
+
+RUN ./build-marte2.sh sdn "${INSTALLATION_DIR}" 
+
+#############################################################################################################
+# Compile MARTe2-components
+#############################################################################################################
+FROM marte2_sdn_built AS marte2_built
+
+ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
+
+ARG MARTe2_components_REF=v1.5.1
+
+RUN ./build-marte2.sh components "${INSTALLATION_DIR}" "${MARTe2_components_REF}"
+
+CMD /bin/bash
+
