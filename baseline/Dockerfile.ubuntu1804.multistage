@@ -4,7 +4,10 @@ FROM ubuntu:18.04 AS marte2_base
 
 RUN apt update
 
-ENV debian_frontend=noninteractive
+# REF https://bobcares.com/blog/debian_frontendnoninteractive-docker/
+# ENV debian_frontend would persist into the image, hence replace by ARG
+#ENV debian_frontend=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Cache control use this with docker build --build-arg CACHE_DATE="$(date)" to force refresh.
 ARG CACHE_DATE=1999-01-04
