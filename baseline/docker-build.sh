@@ -6,7 +6,8 @@
 # TODO: test all combinations (cache/no-cache)
 # TODO: refactor to eliminate the duplication
 
-SUPPORTED_DISTROS="centos7 ubuntu1804 ubuntu2004 debian11"
+source ./builder-completion.bash
+
 
 RELEASED_TAGS="v0.1.0"
 
