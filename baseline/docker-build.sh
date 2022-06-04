@@ -8,8 +8,7 @@
 
 source ./builder-completion.bash
 
-
-RELEASED_TAGS="v0.1.0"
+RELEASED_TAGS="v1.6.0-v1.5.1"
 
 usage() {
 	echo "builder.sh distro [codename]"
