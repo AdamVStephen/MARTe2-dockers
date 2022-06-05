@@ -69,6 +69,7 @@ build_all(){
 	build_stage marte2_core_built "${TARGET_OS}" "${TAG}" "${invalidate_cache}"
 	build_stage marte2_sdn_built "${TARGET_OS}" "${TAG}" "${invalidate_cache}"
 	build_stage marte2_built "${TARGET_OS}" "${TAG}" "${invalidate_cache}"
+	build_stage marte2_env "${TARGET_OS}" "${TAG}" "${invalidate_cache}"
 }
 
 

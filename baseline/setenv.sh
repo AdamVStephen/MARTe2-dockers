@@ -56,9 +56,9 @@ export EPICS_CA_ADDR_LIST=10.208.19.255
 export EPICS_CA_AUTO_ADDR_LIST=NO
 
 make_docker_env(){
-        echo "Creating Docker ENV file env_docker"
+        echo "# Creating Docker ENV file env_docker"
         > env_docker
-for var in MARTe2_DIR MARTe2_Components_DIR
+for var in INSTALLATION_DIR MARTe2_DIR MARTe2_Components_DIR
 do
         echo $var=${!var} | tee -a env_docker
 done

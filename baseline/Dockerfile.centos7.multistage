@@ -108,5 +108,16 @@ ARG MARTe2_components_REF=v1.5.1
 
 RUN ./build-marte2.sh components "${INSTALLATION_DIR}" "${MARTe2_components_REF}"
 
+#############################################################################################################
+# Expose environment for dependent dockers
+#############################################################################################################
+FROM marte2_built AS marte2_env
+
+COPY ./setenv.sh ./setenv.sh
+
+ENV PATH="$PATH:$INSTALLATION_DIR"
+
+#CMD /bin/bash
+#CMD ./setenv.sh
 CMD /bin/bash
 

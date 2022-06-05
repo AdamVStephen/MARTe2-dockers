@@ -10,7 +10,6 @@ FROM ubuntu:18.04 AS marte2_base
 
 # Multistage : propagate ARGs
 ARG DEBIAN_FRONTEND
-ARG TZ
 
 RUN apt update
 
@@ -143,13 +142,21 @@ FROM marte2_sdn_built AS marte2_built
 
 # Multistage : propagate ARGs
 ARG DEBIAN_FRONTEND
-ARG TZ
 
 ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
 
 ARG MARTe2_components_REF=v1.5.1
 
 RUN ./build-marte2.sh components "${INSTALLATION_DIR}" "${MARTe2_components_REF}"
+
+#############################################################################################################
+# Expose environment for dependent dockers
+#############################################################################################################
+FROM marte2_built AS marte2_env
+
+COPY ./setenv.sh ./setenv.sh
+
+ENV PATH="$PATH:$INSTALLATION_DIR"
 
 CMD /bin/bash
 

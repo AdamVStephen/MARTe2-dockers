@@ -1,0 +1,5 @@
+version: '3'
+
+services:
+        marte2-service:
+                build: ./baseline
