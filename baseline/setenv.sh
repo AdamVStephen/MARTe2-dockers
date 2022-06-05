@@ -19,7 +19,7 @@ export SCRIPT_DIR=$(dirname "$SCRIPT_REALPATH")
 if [ $# -eq 0 ]
 then
 export PATH=$PATH:${SCRIPT_DIR}
-export INSTALLATION_DIR=$(realpath "$SCRIPT_DIR/../../")
+export INSTALLATION_DIR=$(realpath "$SCRIPT_DIR")
 else
         INSTALLATION_DIR=$1
         shift
