@@ -1,0 +1,1 @@
+REFACTORING Dockerfiles to eradicate the duplication : probably best with a minimal distro top level and common lower level with ARG
