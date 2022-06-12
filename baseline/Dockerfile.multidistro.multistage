@@ -2,27 +2,16 @@
 #
 # multidistro version uses ARG DISTRO to implement DISTRO specific steps in stage marte2_distro
 #
-#FROM centos:centos7 AS marte2_base
-ARG TZ="Europe/London"
-ENV TZ="$TZ"
-
+# Global Arguments : to access within any multi-stage target, must declare locally to that target
 ARG DISTRO=ubuntu:18.04
-
-FROM "$DISTRO" AS marte2_distro-"$DISTRO"
-
-FROM 
-
-
-
-FROM "$DISTRO" AS marte2_base
-
-
-
+ARG TZ="Europe/London"
 ARG DEBIAN_FRONTEND=noninteractive
 
-#
-
-# Multistage : propagate ARGs
+#############################################################################################################
+# TARGET marte2_base : 
+#############################################################################################################
+FROM ${DISTRO} AS marte2_base
+ENV TZ="$TZ"
 ARG DEBIAN_FRONTEND
 
 RUN apt update
@@ -40,9 +29,7 @@ ENV DOCKERHUB_IMAGE_NAME=MARTe2-baseline-ubuntu1804
 #ARG INSTALL_CMD="yum -t install"
 ARG INSTALL_CMD="apt install -y"
 
-# Minimal requirements for any usable image
-# RUN yum -y install tmux vim
-#RUN apt install -y install tmux vim
+# Minimal requirements for cli work interactively
 RUN $INSTALL_CMD tmux vim
 
 # Using wget to retrieve SDN Source code
@@ -61,7 +48,7 @@ WORKDIR "$INSTALLATION_DIR"
 COPY utils.sh utils.sh
 
 #############################################################################################################
-# Packaged dependencies
+# TARGET marte2_packages : add packaged dependencies
 #############################################################################################################
 FROM marte2_base AS marte2_packages
 
@@ -74,13 +61,13 @@ COPY install-packages.sh install-packages.sh
 RUN ./install-packages.sh
 
 #############################################################################################################
-# Source code 
+# STARGET marte2_source : add source dependencies
 #############################################################################################################
 FROM marte2_packages AS marte2_source
 
 # Multistage : propagate ARGs
 ARG DEBIAN_FRONTEND
-ARG TZ
+#ARG TZ
 
 COPY install-sources.sh install-sources.sh
 
@@ -91,7 +78,6 @@ RUN ./install-sources.sh "${INSTALLATION_DIR}"
 #############################################################################################################
 FROM marte2_source AS marte2_epics_built
 
-# Multistage : propagate ARGs
 ARG DEBIAN_FRONTEND
 ARG TZ
 
@@ -158,6 +144,8 @@ FROM marte2_sdn_built AS marte2_built
 ARG DEBIAN_FRONTEND
 
 ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
+
+ENV MARTe2_components_DIR=${INSTALLATION_DIR}/MARTe2-components
 
 ARG MARTe2_components_REF=v1.5.1
 

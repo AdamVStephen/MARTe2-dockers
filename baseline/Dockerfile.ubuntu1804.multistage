@@ -145,6 +145,8 @@ ARG DEBIAN_FRONTEND
 
 ENV MARTe2_DIR=${INSTALLATION_DIR}/MARTe2-dev
 
+ENV MARTe2_components_DIR=${INSTALLATION_DIR}/MARTe2-components
+
 ARG MARTe2_components_REF=v1.5.1
 
 RUN ./build-marte2.sh components "${INSTALLATION_DIR}" "${MARTe2_components_REF}"
