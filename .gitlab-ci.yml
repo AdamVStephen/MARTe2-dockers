@@ -1,0 +1,11 @@
+stages:
+        - evaluate
+
+evaluate:
+        stage: evaluate
+        script:
+                - export tag_name=$(sed '|/|_|g' <<< $CI_COMMIT_REF_NAME)                       
+                - echo "tag_name=$tag_name" >> build.env
+        artifacts:
+                reports:
+                        dotenv: build.env                               
