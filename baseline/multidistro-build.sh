@@ -38,20 +38,36 @@ target2distro() {
         esac
 }
 
-target2install_cmd() {
+target2package_manager() {
 target=$1
 case "$target" in
         ubuntu*|rocky)
-                echo "apt install -y"
+                echo "apt"
                 ;;
         centos*|rh*)
-                echo "yum -y install"
+                echo "yum"
                 ;;
         *)
                 echo "unknown-package-installer"
                 ;;
 esac
 }
+
+target2update_cmd() {
+target=$1
+case "$target" in
+        ubuntu*|rocky)
+                echo "apt update && apt upgrade"
+                ;;
+        centos*|rh*)
+                echo "yum update -y && yum upgrade -y"
+                ;;
+        *)
+                echo "unknown-package-installer"
+                ;;
+esac
+}
+
 
 build_stage() {
 
@@ -62,7 +78,9 @@ build_stage() {
 
         DISTRO=$(target2distro "$TARGET_OS")
 
-        INSTALL_CMD=$(target2install_cmd "$TARGET_OS")
+        PACKAGE_MANAGER=$(target2package_manager "$TARGET_OS")
+        
+       # UPDATE_CMD=$(target2update_cmd "$TARGET_OS")
 
         if [ x"$invalidate_cache" == "xy" ]
         then
@@ -77,7 +95,7 @@ build_stage() {
         time docker build ${CACHE_OPT} \
                 --target "${TARGET_STAGE}" \
                 --build-arg "DISTRO=${DISTRO}" \
-                --build-arg "INSTALL_CMD=${INSTALL_CMD}" \
+                --build-arg "PACKAGE_MANAGER=${PACKAGE_MANAGER}" \
                 --build-arg "MARTe2_REF=${MARTe2_REF}" \
                 --build-arg "MARTe2_components_REF=${MARTe2_components_REF}" \
                 --build-arg "EPICS_VERSION=${EPICS_VERSION}" \
@@ -119,7 +137,7 @@ else
                 # With cache invalidation
                 #build_all "$distro" "$TAG" y
                 # Without cache invalidation
-                build_all "$distro" "$TAG" n
+                build_all "$distro" "$TAG" y
         else
                 usage
                 exit 54

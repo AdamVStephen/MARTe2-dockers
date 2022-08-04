@@ -38,12 +38,6 @@ install_packages_yum_generic() {
         # Dependencies to build MARTe2 and EPICS
         yum -y install ncurses-devel readline-devel
 
-        # Dependencies to build python3 > 3.7 with openssl
-        yum -y install openssl openssl-devel
-
-        # Dependencies to build python3 > 3.7 with ctypes
-        yum -y install libffi-devel
-
         # Python and Perl Parse utilities for open62541 (open source impleemntation of OPC UA based on IEC 62541)
         yum -y install python-dateutil python-six perl-ExtUtils-ParseXS
 
@@ -62,7 +56,7 @@ install_python(){
                 yum -y install python3.7-dev
         else
                 mkdir -p /opt/python-install/ && cd $_
-                wget https://www.python.org/ftp/python/${PYTHON_MAJOR_MINOR}/Python-${PYTHON_MAJOR_MINOR}.tgz
+                wget https://www.python.org/ftp/python/${PYTHON_MAJOR_MINOR}/Python.${PYTHON_MAJOR_MINOR}.tgz
                 tar xzf Python-${PYTHON_MAJOR_MINOR}.tgz
                 cd Python-${PYTHON_MAJOR_MINOR}
                 ./configure --enable-optimizations

@@ -85,7 +85,7 @@ else
                 # With cache invalidation
                 #build_all "$distro" "$TAG" y
                 # Without cache invalidation
-                build_all "$distro" "$TAG" n
+                build_all "$distro" "$TAG" y
         else
                 usage
                 exit 54

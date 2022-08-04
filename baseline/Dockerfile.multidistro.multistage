@@ -14,7 +14,10 @@ FROM ${DISTRO} AS marte2_base
 ENV TZ="$TZ"
 ARG DEBIAN_FRONTEND
 
-RUN apt update
+ARG PACKAGE_MANAGER=yum
+#ARG UPDATE_CMD="yum update -y"
+#ARG UPDATE_CMD="apt update && apt upgrade"
+RUN $PACKAGE_MANAGER -y update && $PACKAGE_MANAGER -y upgrade
 
 # Cache control use this with docker build --build-arg CACHE_DATE="$(date)" to force refresh.
 ARG CACHE_DATE=1999-01-04
@@ -27,7 +30,8 @@ ENV DOCKERHUB_IMAGE_NAME=MARTe2-baseline-ubuntu1804
 
 # For packages with equivalent names in different distro families the following can simplify Dockerfiles.
 #ARG INSTALL_CMD="yum -t install"
-ARG INSTALL_CMD="apt install -y"
+#ARG INSTALL_CMD="apt install -y"
+ENV INSTALL_CMD="$PACKAGE_MANAGER install -y"
 
 # Minimal requirements for cli work interactively
 RUN $INSTALL_CMD tmux vim
@@ -37,8 +41,8 @@ RUN $INSTALL_CMD wget
 
 # To clone from some repos recursively requires git > 1.8.x (default centos) so jump through hoops
 #
-#RUN yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
-#RUN yum -y install git
+RUN yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+RUN yum -y install git
 
 # Scripts should work robustly from any reasonable directory.
 ENV INSTALLATION_DIR=/opt/MARTe2/Projects
