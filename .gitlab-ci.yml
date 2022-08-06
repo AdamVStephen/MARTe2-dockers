@@ -14,6 +14,11 @@ evaluate:
 
 gitlabci-test-a:
         stage: gitlabci-test-a
+        tags:
+                - docker
+                - lower-privacy
+                - meta
+                - ubuntu
         script :
                 - echo "hello-world" >> hw.carbon
                 - env >> build.env
