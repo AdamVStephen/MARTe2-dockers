@@ -21,10 +21,10 @@ gitlabci-test-a:
                 - ubuntu
         script :
                 - echo "hello-world" >> hw.carbon
-                - env >> build.env
+                - env >> build-a.env
         artifacts:
                 reports:
-                        dotenv: build.env
+                        dotenv: build-a.env
                 expire_in: 1 week
 
                         
