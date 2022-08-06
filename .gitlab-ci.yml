@@ -1,5 +1,7 @@
 stages:
         - evaluate
+        - gitlabci-test-a
+        - gitlabci-test-b
 
 evaluate:
         stage: evaluate
@@ -9,3 +11,22 @@ evaluate:
         artifacts:
                 reports:
                         dotenv: build.env                               
+
+gitlabci-test-a:
+        stage: gitlabci-test-a
+        script :
+                - echo "hello-world" >> hw.carbon
+        artifacts:
+                reports:
+                        dotenv: build.env
+                expire_in: 1 week
+
+                        
+gitlabci-test-b:
+        stage: gitlabci-test-b
+        script :
+                - echo "hello-world" >> hw.carbon
+        artifacts:
+                reports:
+                        dotenv: other.env
+                expire_in: 1 hour
