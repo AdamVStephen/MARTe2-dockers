@@ -16,6 +16,7 @@ gitlabci-test-a:
         stage: gitlabci-test-a
         script :
                 - echo "hello-world" >> hw.carbon
+                - env >> build.env
         artifacts:
                 reports:
                         dotenv: build.env
@@ -26,6 +27,7 @@ gitlabci-test-b:
         stage: gitlabci-test-b
         script :
                 - echo "hello-world" >> hw.carbon
+                - env >> other.env
         artifacts:
                 reports:
                         dotenv: other.env
