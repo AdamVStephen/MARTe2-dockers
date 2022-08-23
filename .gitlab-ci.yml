@@ -1,39 +1,30 @@
+# vim: set ts=2 sts=2 sw=2 expandtab ruler:
 stages:
-        - evaluate
-        - gitlabci-test-a
-        - gitlabci-test-b
+  - docker_base
 
-evaluate:
-        stage: evaluate
-        script:
-                - export tag_name=$(sed -e 's|/|_|g' <<< $CI_COMMIT_REF_NAME)                       
-                - echo "tag_name=$tag_name" >> build.env
-        artifacts:
-                reports:
-                        dotenv: build.env                               
-
-gitlabci-test-a:
-        stage: gitlabci-test-a
-        tags:
-                - docker
-                - lower-privacy
-                - meta
-                - ubuntu
-        script :
-                - echo "hello-world" >> hw.carbon
-                - env >> build-a.env
-        artifacts:
-                reports:
-                        dotenv: build-a.env
-                expire_in: 1 week
-
-                        
-gitlabci-test-b:
-        stage: gitlabci-test-b
-        script :
-                - echo "hello-world" >> hw.carbon
-                - env >> other.env
-        artifacts:
-                reports:
-                        dotenv: other.env
-                expire_in: 1 hour
+docker-base:
+  stage: docker_base
+  image: docker:19.03.12
+  services:
+     - docker:19.03.12-dind
+  tags:
+     - lower-privacy
+     - docker
+     - ubuntu
+     - meta
+  script:
+     - export IMAGE_NAME=$CI_REGISTRY_IMAGE
+     - cd baseline
+     - export TEST=$(./docker-build.sh centos7 --get-image-name)
+     - echo "IMAGE_NAME = $IMAGE_NAME" >> /tmp/info.txt
+     - echo "TEST = $TEST" >> /tmp/info.txt
+     - #docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+     - #cd baseline && docker-build.sh centos7
+     - #docker push $IMAGE_NAME
+  only:
+     variables:
+       - $DOCKER_BASE
+  artifacts:
+    paths:
+      - /tmp/info.txt   
+  allow_failure: true

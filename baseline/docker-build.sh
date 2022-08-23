@@ -15,8 +15,8 @@ export TAG="m2-${MARTe2_REF}-m2c-${MARTe2_components_REF}-ep-${EPICS_VERSION}"
 export DOCKER_TAG_PREFIX=git.ccfe.ac.uk:4567/marte2/dockers/marte2-dockers/baseline-
 
 usage() {
-        echo "builder.sh distro [codename]"
-        echo
+        echo "builder.sh distro [--get-image-name]"
+        echo "Build or list image name if --get-image-name option is provided"
         echo "Supported distros"
         for d in ${SUPPORTED_DISTROS}
         do
@@ -81,11 +81,12 @@ else
         shift
         if [[ "$SUPPORTED_DISTROS" =~ (^|[[:space:]])"$distro"($|[[:space:]]) ]]
         then
-                #echo "$distro IS supported : congratulations"
-                # With cache invalidation
-                #build_all "$distro" "$TAG" y
-                # Without cache invalidation
-                build_all "$distro" "$TAG" y
+                if [ $# -eq 0 ]
+                then
+                        build_all "$distro" "$TAG" y
+                else
+                        echo "${DOCKER_TAG_PREFIX}${TARGET_OS}:${TAG}" 
+                fi 
         else
                 usage
                 exit 54
