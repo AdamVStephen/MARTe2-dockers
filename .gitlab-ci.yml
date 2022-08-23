@@ -18,9 +18,6 @@ docker-base:
      - export TEST=$(./docker-build.sh centos7 --get-image-name)
      - echo "IMAGE_NAME = $IMAGE_NAME" >> /tmp/info.txt
      - echo "TEST = $TEST" >> /tmp/info.txt
-     - #docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-     - #cd baseline && docker-build.sh centos7
-     - #docker push $IMAGE_NAME
   only:
      variables:
        - $DOCKER_BASE
@@ -28,3 +25,9 @@ docker-base:
     paths:
       - /tmp/info.txt   
   allow_failure: true
+
+
+  
+#docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#cd baseline && docker-build.sh centos7
+#docker push $IMAGE_NAME
